@@ -8,33 +8,45 @@ import (
 	"github.com/fbsobreira/gotron-sdk/pkg/client"
 	"github.com/fbsobreira/gotron-sdk/pkg/proto/api"
 	"github.com/fbsobreira/gotron-sdk/pkg/proto/core"
+	"google.golang.org/grpc"
 	"math/big"
 	"strings"
 	"time"
 )
 
 type Client struct {
-	node string
-	GRPC *client.GrpcClient
+	node   string
+	apikey string
+	GRPC   *client.GrpcClient
 }
 
-func NewClient(node string) (*Client, error) {
+func NewClient(node string, apikey string, opts ...grpc.DialOption) (*Client, error) {
 	c := new(Client)
 	c.node = node
+	c.apikey = apikey
 	c.GRPC = client.NewGrpcClient(node)
-	err := c.GRPC.Start()
+	err := c.GRPC.SetAPIKey(apikey)
+	if err != nil {
+		return nil, fmt.Errorf("grpc set apikey error: %v", err)
+	}
+
+	err = c.GRPC.Start(opts...)
 	if err != nil {
 		return nil, fmt.Errorf("grpc client start error: %v", err)
 	}
 	return c, nil
 }
 
-func (c *Client) SetTimeout(timeout time.Duration) error {
+func (c *Client) SetTimeout(timeout time.Duration, opts grpc.DialOption) error {
 	if c == nil {
 		return errors.New("client is nil ptr")
 	}
+	err := c.GRPC.SetAPIKey(c.apikey)
+	if err != nil {
+		return fmt.Errorf("grpc set apikey error: %v", err)
+	}
 	c.GRPC = client.NewGrpcClientWithTimeout(c.node, timeout)
-	err := c.GRPC.Start()
+	err = c.GRPC.Start(opts)
 	if err != nil {
 		return fmt.Errorf("grpc start error: %v", err)
 	}

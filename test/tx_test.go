@@ -6,49 +6,53 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/JFJun/trx-sign-go/grpcs"
-	"github.com/JFJun/trx-sign-go/sign"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/fatih/structs"
-	addr "github.com/fbsobreira/gotron-sdk/pkg/address"
-	"github.com/fbsobreira/gotron-sdk/pkg/common"
 	"github.com/fbsobreira/gotron-sdk/pkg/proto/core"
 	"github.com/golang/protobuf/ptypes"
-	"math/big"
+	"github.com/ygcool/trx-sign-go/grpcs"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"strings"
 	"testing"
 )
 
-func Test_TransferTrx(t *testing.T) {
-	c, err := grpcs.NewClient("54.168.218.95:50051")
-	if err != nil {
-		t.Fatal(err)
-	}
-	tx, err := c.Transfer("TFTGMfp7hvDtt4fj3vmWnbYsPSmw5EU8oX", "TVwt3HTg6PjP5bbb5x1GtSvTe1J5FYM2BT", 10000)
-	if err != nil {
-		fmt.Println(111)
-		t.Fatal(err)
-	}
-	signTx, err := sign.SignTransaction(tx.Transaction, "")
-	if err != nil {
-		fmt.Println(222)
-		t.Fatal(err)
-	}
-	err = c.BroadcastTransaction(signTx)
-	if err != nil {
-		fmt.Println(333)
-		t.Fatal(err)
-	}
-	fmt.Println(common.BytesToHexString(tx.GetTxid()))
+var testApikey = ""
 
-}
+//func Test_TransferTrx(t *testing.T) {
+//	opts := make([]grpc.DialOption, 0)
+//	opts = append(opts, grpc.WithInsecure())
+//	c, err := grpcs.NewClient("grpc.trongrid.io:50051", testApikey, opts)
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//	tx, err := c.Transfer("TFTGMfp7hvDtt4fj3vmWnbYsPSmw5EU8oX", "TVwt3HTg6PjP5bbb5x1GtSvTe1J5FYM2BT", 10000)
+//	if err != nil {
+//		fmt.Println(111)
+//		t.Fatal(err)
+//	}
+//	signTx, err := sign.SignTransaction(tx.Transaction, "")
+//	if err != nil {
+//		fmt.Println(222)
+//		t.Fatal(err)
+//	}
+//	err = c.BroadcastTransaction(signTx)
+//	if err != nil {
+//		fmt.Println(333)
+//		t.Fatal(err)
+//	}
+//	fmt.Println(common.BytesToHexString(tx.GetTxid()))
+//
+//}
 
 func Test_GetBalance(t *testing.T) {
-	c, err := grpcs.NewClient("3.225.171.164:50051")
+	opts := make([]grpc.DialOption, 0)
+	opts = append(opts, grpc.WithInsecure())
+	c, err := grpcs.NewClient("grpc.trongrid.io:50051", testApikey, grpc.WithTransportCredentials(credentials.NewTLS(nil)))
 	if err != nil {
 		t.Fatal(err)
 	}
-	acc, err := c.GetTrxBalance("TK1UXQBkvAwBypz1bTWcuLHFaB8JmTjoUw")
+	acc, err := c.GetTrxBalance("TT1DyeqXaaJkt6UhVYFWUXBXknaXnBudTK")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,11 +63,13 @@ func Test_GetBalance(t *testing.T) {
 }
 
 func Test_GetTrc20Balance(t *testing.T) {
-	c, err := grpcs.NewClient("grpc.trongrid.io:50051")
+	opts := make([]grpc.DialOption, 0)
+	opts = append(opts, grpc.WithInsecure())
+	c, err := grpcs.NewClient("grpc.trongrid.io:50051", testApikey, grpc.WithInsecure())
 	if err != nil {
 		t.Fatal(err)
 	}
-	amount, err := c.GetTrc20Balance("TK1UXQBkvAwBypz1bTWcuLHFaB8JmTjoUw", "TLdfZSUTwAJXxbav6od8iYCBSaW3EveYxm")
+	amount, err := c.GetTrc20Balance("TT1DyeqXaaJkt6UhVYFWUXBXknaXnBudTK", "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,54 +77,60 @@ func Test_GetTrc20Balance(t *testing.T) {
 
 }
 
-func Test_TransferTrc20(t *testing.T) {
-	c, err := grpcs.NewClient("54.168.218.95:50051")
-	if err != nil {
-		t.Fatal(err)
-	}
-	amount := big.NewInt(20)
-	amount = amount.Mul(amount, big.NewInt(1000000000000000000))
-	tx, err := c.TransferTrc20("TFTGMfp7hvDtt4fj3vmWnbYsPSmw5EU8oX", "TVwt3HTg6PjP5bbb5x1GtSvTe1J5FYM2BT",
-		"TJ93jQZibdB3sriHYb5nNwjgkPPAcFR7ty", amount, 100000000)
-	signTx, err := sign.SignTransaction(tx.Transaction, "5c023564aa0c582e9a5d127133e9b45c5b9a7a409b22f7e8a5c19d4d3f424eea")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = c.BroadcastTransaction(signTx)
-	if err != nil {
-		t.Fatal(err)
+//func Test_TransferTrc20(t *testing.T) {
+//	opts := make([]grpc.DialOption, 0)
+//	opts = append(opts, grpc.WithInsecure())
+//	c, err := grpcs.NewClient("grpc.trongrid.io:50051", testApikey, opts)
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//	amount := big.NewInt(20)
+//	amount = amount.Mul(amount, big.NewInt(1000000000000000000))
+//	tx, err := c.TransferTrc20("TFTGMfp7hvDtt4fj3vmWnbYsPSmw5EU8oX", "TVwt3HTg6PjP5bbb5x1GtSvTe1J5FYM2BT",
+//		"TJ93jQZibdB3sriHYb5nNwjgkPPAcFR7ty", amount, 100000000)
+//	signTx, err := sign.SignTransaction(tx.Transaction, "5c023564aa0c582e9a5d127133e9b45c5b9a7a409b22f7e8a5c19d4d3f424eea")
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//	err = c.BroadcastTransaction(signTx)
+//	if err != nil {
+//		t.Fatal(err)
+//
+//	}
+//	fmt.Println(common.BytesToHexString(tx.GetTxid()))
+//}
 
-	}
-	fmt.Println(common.BytesToHexString(tx.GetTxid()))
-}
-
-func Test_TransferTrc10(t *testing.T) {
-	c, err := grpcs.NewClient("47.252.19.181:50051")
-	if err != nil {
-		t.Fatal(err)
-	}
-	from, _ := addr.Base58ToAddress("TFXf56UG1bhWkZq7WQEf7XW5hZXku17E8M")
-	to, _ := addr.Base58ToAddress("TL4ebGiBbBPjduKaNEoPytVyzEuPEsFYz9")
-	tokenID := "1000016"
-	tx, err := c.GRPC.TransferAsset(from.String(), to.String(), tokenID, int64(123456))
-	signTx, err := sign.SignTransaction(tx.Transaction, "")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = c.BroadcastTransaction(signTx)
-	if err != nil {
-		t.Fatal(err)
-
-	}
-	fmt.Println(common.BytesToHexString(tx.GetTxid()))
-}
+//func Test_TransferTrc10(t *testing.T) {
+//	opts := make([]grpc.DialOption, 0)
+//	opts = append(opts, grpc.WithInsecure())
+//	c, err := grpcs.NewClient("grpc.trongrid.io:50051", testApikey, opts)
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//	from, _ := addr.Base58ToAddress("TFXf56UG1bhWkZq7WQEf7XW5hZXku17E8M")
+//	to, _ := addr.Base58ToAddress("TL4ebGiBbBPjduKaNEoPytVyzEuPEsFYz9")
+//	tokenID := "1000016"
+//	tx, err := c.GRPC.TransferAsset(from.String(), to.String(), tokenID, int64(123456))
+//	signTx, err := sign.SignTransaction(tx.Transaction, "")
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//	err = c.BroadcastTransaction(signTx)
+//	if err != nil {
+//		t.Fatal(err)
+//
+//	}
+//	fmt.Println(common.BytesToHexString(tx.GetTxid()))
+//}
 
 func Test_GetTrc10Balance(t *testing.T) {
-	c, err := grpcs.NewClient("grpc.trongrid.io:50051")
+	opts := make([]grpc.DialOption, 0)
+	opts = append(opts, grpc.WithInsecure())
+	c, err := grpcs.NewClient("grpc.trongrid.io:50051", testApikey, grpc.WithInsecure())
 	if err != nil {
 		t.Fatal(err)
 	}
-	amount, err := c.GetTrc10Balance("TK1UXQBkvAwBypz1bTWcuLHFaB8JmTjoUw", "1002000")
+	amount, err := c.GetTrc10Balance("TT1DyeqXaaJkt6UhVYFWUXBXknaXnBudTK", "1004031")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,7 +172,9 @@ func DecodeCheck(input string) ([]byte, error) {
 }
 
 func Test_GetBlock(t *testing.T) {
-	c, err := grpcs.NewClient("47.252.19.181:50051")
+	opts := make([]grpc.DialOption, 0)
+	opts = append(opts, grpc.WithInsecure())
+	c, err := grpcs.NewClient("grpc.trongrid.io:50051", testApikey, grpc.WithInsecure())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,11 +187,13 @@ func Test_GetBlock(t *testing.T) {
 }
 
 func Test_GetTxByTxid(t *testing.T) {
-	c, err := grpcs.NewClient("grpc.trongrid.io:50051")
+	opts := make([]grpc.DialOption, 0)
+	opts = append(opts, grpc.WithInsecure())
+	c, err := grpcs.NewClient("grpc.trongrid.io:50051", testApikey, grpc.WithInsecure())
 	if err != nil {
 		t.Fatal(err)
 	}
-	ti, err := c.GRPC.GetTransactionInfoByID("efe29a10301aae1c666a6db457708f0a9c452edbae81316a35a21483ce4772ab")
+	ti, err := c.GRPC.GetTransactionInfoByID("d89ba40d63e6f8f6585337a4617aa531639dec4aeaaf2d874e1ebb3bea050784")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -187,11 +203,13 @@ func Test_GetTxByTxid(t *testing.T) {
 }
 
 func Test_GetTransaction(t *testing.T) {
-	c, err := grpcs.NewClient("3.225.171.164:50051")
+	opts := make([]grpc.DialOption, 0)
+	opts = append(opts, grpc.WithInsecure())
+	c, err := grpcs.NewClient("grpc.trongrid.io:50051", testApikey, grpc.WithInsecure())
 	if err != nil {
 		t.Fatal(err)
 	}
-	txid := "4dd50423887a722e812c70de058bb76b28ee33a2785ebaa6470dc0e2db8eeb53"
+	txid := "d89ba40d63e6f8f6585337a4617aa531639dec4aeaaf2d874e1ebb3bea050784"
 	txInfo, err := c.GRPC.GetTransactionByID(txid)
 	if err != nil {
 		t.Fatal(err)
